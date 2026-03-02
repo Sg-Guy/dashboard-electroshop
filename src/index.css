@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "tailwindcss";
+
+@theme {
+  /* des couleurs personnalisées ici */
+}
+
+/* Forcer Tailwind à écouter la classe "dark" sur la balise <html> */
+@variant dark (&:where(.dark, .dark *));

@@ -1,0 +1,52 @@
+# Création du projet avec Vite
+npm create vite@latest mon-dashboard -- --template react
+
+# Installation des dépendances de base
+npm install react-router-dom axios lucide-react @tanstack/react-query
+
+# Installation et config de Tailwind CSS (recommandé pour les dashboards)
+npm install -D @tailwindcss/postcss
+npx tailwindcss init -
+
+#la bibliothèque standard pour les animations en React
+npm install lucide-react framer-motion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Mon Architecture
+src/
+├── api/              # Instances Axios et définitions des appels API
+├── assets/           # Images, logos, polices
+├── components/       # Composants réutilisables (Boutons, Cards, Tables)
+│   ├── common/       # UI de base
+│   └── layout/       # Sidebar, Navbar, Wrapper
+├── hooks/            # Hooks personnalisés (ex: useAuth, useStats)
+├── layouts/          # Différents types de pages (AdminLayout, AuthLayout)
+├── pages/            # Les pages de mon dashboard (Home, Users, Settings)
+├── store/            # Gestion d'état global (Context API ou Zustand)
+├── utils/            # Fonctions utilitaires (formatage de date, prix, etc.)
+├── App.jsx           # Configuration des routes
+└── main.jsx          # Point d'entrée
