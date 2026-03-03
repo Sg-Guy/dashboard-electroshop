@@ -11,6 +11,9 @@ npx tailwindcss init -
 #la bibliothèque standard pour les animations en React
 npm install lucide-react framer-motion
 
+#Pour les graphes sur mon dashboard
+npm install recharts
+
 
 
 
