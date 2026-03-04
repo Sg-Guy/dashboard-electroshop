@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tailwindcss";
 
 @theme {
   /* des couleurs personnalisées ici */
@@ -7,3 +6,13 @@
 
 /* Forcer Tailwind à écouter la classe "dark" sur la balise <html> */
 @variant dark (&:where(.dark, .dark *));
+
+@layer components {
+  .form-input-tech {
+    /* Tailwind v4 a besoin de savoir où chercher ces classes */
+    @apply w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl outline-none transition-all font-medium;
+    
+    /* Pour les modes sombres en v4, utilise de préférence les variables ou @apply avec dark: */
+    @apply dark:bg-slate-800 dark:border-slate-700 dark:text-white;
+  }
+}

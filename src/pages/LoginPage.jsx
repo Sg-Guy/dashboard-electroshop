@@ -1,8 +1,17 @@
 import React, { useState } from "react";
 import { LogIn, Mail, Lock, Sun, Moon, Computer, Phone } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import { useNavigate } from "react-router-dom";
+import url from "../utils/url";
 
 const LoginPage = () => {
+
+  // Navidation
+  const navigation = useNavigate() ;
+  const NavigateToDash = ()=>{
+    navigation(`${url}` , {replace: true}) ;
+  }
+
   const { isDarkMode, toggleTheme } = useTheme();
   const [formData, setFormData] = useState({
     email: "",
@@ -86,6 +95,7 @@ const LoginPage = () => {
 
           <button
             type="submit"
+            onClick={NavigateToDash}
             className="w-full py-4 font-bold text-white transition-all bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none active:scale-95"
           >
             Se connecter

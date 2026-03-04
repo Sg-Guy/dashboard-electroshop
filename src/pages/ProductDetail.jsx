@@ -4,8 +4,15 @@ import SideBar from "./SideBar";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import ordinateur from "../assets/ordinateur.jpg";
+import { useNavigate, useParams } from "react-router-dom";
+import url from "../utils/url";
 
 const ProductDetail = () => {
+  // Navigation 
+  const navigation = useNavigate() ;
+  const toProducts = ()=> {
+    navigation(`${url}/products`) 
+  }
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const product = {
     id: 1,
@@ -18,7 +25,7 @@ const ProductDetail = () => {
       "Le dernier iPhone avec puce A17 Pro, écran Super Retina XDR de 6.1 pouces, et système de caméra triple avancé.",
     stock: 3,
     vedette: 1,
-  };
+  } ;
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
@@ -47,7 +54,7 @@ const ProductDetail = () => {
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
         <div className="flex ml-4 gap-2 p-3 dark:text-white">
-            <button className="cursor-pointer ">
+            <button onClick={toProducts}  className="cursor-pointer ">
                 <ArrowBigLeft size={24}/> 
             </button> Retour
         </div>
@@ -67,7 +74,7 @@ const ProductDetail = () => {
               <div className="w-32 h-32 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center p-4">
                 <img
                   src={product.image}
-                  alt="iPhone"
+                  alt={product.name}
                   className="w-full object-contain"
                 />
               </div>
@@ -120,7 +127,7 @@ const ProductDetail = () => {
 
           {/*SECTION DROITE : STATS & DATES  */}
           <div className="space-y-6">
-            
+
             {/* Statistiques Rapides */}
             <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">
@@ -164,10 +171,12 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+        
       </main>
     </div>
   );
 };
+
 
 const InfoBlock = ({ title, children }) => (
   <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">

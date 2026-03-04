@@ -8,11 +8,23 @@ import Dashboard from "./pages/Dashboard";
 import ProductPage from "./pages/Products";
 import Categorie from "./pages/Categorie";
 import ProductDetail from "./pages/ProductDetail";
+import CategoryDetail from "./pages/CategoryDetail";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import url from "./utils/url";
 
 function App() {
   return (
     <>
-      <ProductDetail />
+      <Router>
+        <Routes>
+          <Route path = "/" element = {<HomePage />} />
+          <Route path = "/login" element = {<LoginPage />} />
+          <Route path ={ `${url}`} element = {<Dashboard />} />
+          <Route path = {`${url}/products`} element = {<ProductPage />} />
+          <Route path = {`${url}/categories`} element = {<Categorie />} />
+          <Route path = {`${url}/product/1`} element = {<ProductDetail />} />
+        </Routes>
+      </Router>
     </>
   );
 }

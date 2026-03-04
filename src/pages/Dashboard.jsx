@@ -28,8 +28,11 @@ import {
 import { useTheme } from "../context/ThemeContext";
 import SideBar from "./SideBar";
 import Header from "./header";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+
+ 
   const { isDarkMode, toggleTheme } = useTheme();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
@@ -72,6 +75,13 @@ const Dashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+      <div
+        className="absolute inset-0 z-0 opacity-30 dark:opacity-10"
+        style={{
+          backgroundImage: `linear-gradient(${isDarkMode ? "#334155" : "#e5e7eb"} 1px, transparent 1px), linear-gradient(90deg, ${isDarkMode ? "#334155" : "#e5e7eb"} 1px, transparent 1px)`,
+          backgroundSize: "40px 40px",
+        }}
+      ></div>
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div 
@@ -82,11 +92,11 @@ const Dashboard = () => {
         )}
       </AnimatePresence>
 
-      <div className={`fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out`}>
-        <SideBar activePage="products" closeMobile={() => setSidebarOpen(false)} />
+      <div className={` fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out`}>
+        <SideBar activePage="dashboard" closeMobile={() => setSidebarOpen(false)} />
       </div>
       
-      <main className="flex-1 lg:ml-64 w-full overflow-x-hidden">
+      <main className="z-10 flex-1 lg:ml-64 w-full overflow-x-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)}/>
           <div className=" lg:px-8 py-3">
           <p className="dark:text-white text-3xl font-bold">

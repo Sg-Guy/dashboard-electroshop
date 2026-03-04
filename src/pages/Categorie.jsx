@@ -36,7 +36,6 @@ const Categorie = () => {
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
-      {/* SIDEBAR AVEC LOGIQUE MOBILE */}
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div

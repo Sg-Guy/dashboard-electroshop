@@ -5,8 +5,13 @@ import {
   Layers, Settings, ArrowRight, Bell, Sun, Moon 
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
+  const navigation  = useNavigate();
+    const NavigateToLogin = ()=>{
+        navigation ('/login');
+    } ;
   const { isDarkMode, toggleTheme } = useTheme();
 
   return (
@@ -48,6 +53,7 @@ const HomePage = () => {
         </motion.p>
 
         <motion.button 
+          onClick={NavigateToLogin}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="z-10 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-blue-200 dark:shadow-none"
