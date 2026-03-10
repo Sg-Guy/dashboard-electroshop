@@ -27,7 +27,7 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
   useEffect(() => {
     if (product && isOpen) {
       setFormData({
-        nom: product.name || "", // attention : vérifie si c'est .nom ou .name dans ton objet
+        nom: product.nom || "", // attention : vérifie si c'est .nom ou .nom dans ton objet
         category_id: product.category_id || "",
         description: product.description || "",
         prix_unitaire: product.prix_unitaire || "",
@@ -43,16 +43,16 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
 
   // Correction du handleChange pour supporter les fichiers et les nombres
   const handleChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
+    const { nom, value, type, checked, files } = e.target;
 
     let finalValue = value;
     if (type === "checkbox") finalValue = checked ? 1 : 0;
     if (type === "file") finalValue = files[0]; // Stocke l'objet File
     if (type === "number") finalValue = value === "" ? "" : Number(value);
 
-    setFormData((prev) => ({ ...prev, [name]: finalValue }));
+    setFormData((prev) => ({ ...prev, [nom]: finalValue }));
     // Nettoyer l'erreur quand l'utilisateur tape
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: null }));
+    if (errors[nom]) setErrors((prev) => ({ ...prev, [nom]: null }));
   };
 
   // Fonction de validation
@@ -239,7 +239,7 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
                     <img
                       src={
                         typeof formData.image === "string"
-                          ? formData.image
+                          ? `http://localhost:8000/storage/${formData.image}`
                           : URL.createObjectURL(formData.image)
                       }
                       alt="Preview"

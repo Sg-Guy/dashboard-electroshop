@@ -3,16 +3,23 @@ import { LogIn, Mail, Lock, Sun, Moon, Computer, Phone } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import url from "../utils/url";
+import api, { login } from "../ApiSevice/api";
+import TechSpinner from "./TechSpinner";
 
 const LoginPage = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [apiStatus , setApiStatus] = useState("");
 
   // Navidation
-  const navigation = useNavigate() ;
-  const NavigateToDash = ()=>{
-    navigation(`${url}` , {replace: true}) ;
-  }
+  const navigation = useNavigate();
+  const NavigateToDash = () => {
+    navigation(`${url}`, { replace: true });
+  };
 
   const { isDarkMode, toggleTheme } = useTheme();
+
+  //Données à envoyer
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -24,8 +31,41 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Données prêtes pour l'API :", formData);
-    // axios.post('/login', formData)...
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await login(formData);
+
+      const { token, user } = response.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", user);
+
+      console.log (response) ;
+
+      setApiStatus ('success') ;
+      NavigateToDash();
+    } catch (err) {
+      if (!err.response) {
+        setApiStatus ('offline') ;
+        setError("Le serveur ne répond pas. Vérifiez votre connexion.");
+      } else if (err.response?.status==401) {
+        setApiStatus ('identifiants_invalides') ;
+        setError("Identifiants invalides !");
+      } else if (err.response?.status==403) {
+        setApiStatus ('forbidden') ;
+        setError(err.response?.message || "Accès interdit");
+      } else if (err.response.status == 500) {
+        setApiStatus ('server_error') ;
+        setError("Erreur interne au serveur !");
+      } else {
+        setApiStatus ('other_error')
+        setError("Une erreur inattendue est survenue .");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -40,67 +80,140 @@ const LoginPage = () => {
 
       {/* FORMULAIRE */}
       <div className="flex flex-col justify-center w-full px-8 md:w-1/2 lg:px-24">
-        <div className="mb-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 mb-6 text-white rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-200 dark:shadow-none">
-            <LogIn size={28} />
-          </div>
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
-            Connexion Admin
-          </h1>
-          <p className="mt-2 text-slate-500 dark:text-slate-400">
-            Accédez à votre espace d'administration ElectroShop
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Adresse Email
-            </label>
-            <div className="relative">
-              <Mail
-                className="absolute left-3 top-3.5 text-slate-400"
-                size={20}
-              />
-              <input
-                type="email"
-                name="email"
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 dark:bg-transparent border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:text-white"
-                placeholder="admin@electroshop.com"
-                required
-              />
+        {isLoading ? (
+          <TechSpinner />
+        ) : apiStatus === "server_error" ? (
+          /* CRASH SERVEUR (500) */
+          <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
+            <h1 className="text-8xl font-black text-slate-200 dark:text-slate-800 absolute -z-10">
+              500
+            </h1>
+            <div className="relative z-10 space-y-4">
+              <h2 className="text-2xl font-black text-red-500 uppercase tracking-widest">
+                Erreur
+              </h2>
+              <p className="text-slate-400 max-w-sm italic">{error}</p>
+              <button
+                onClick={handleSubmit}
+                className="px-8 py-3 border-2 border-red-500 text-red-500 rounded-2xl font-black hover:bg-red-500 hover:text-white transition-all"
+              >
+                Relancer la requête
+              </button>
             </div>
           </div>
-
-          <div>
-            <label className="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Mot de passe
-            </label>
-            <div className="relative">
-              <Lock
-                className="absolute left-3 top-3.5 text-slate-400"
-                size={20}
-              />
-              <input
-                type="password"
-                name="password"
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 bg-transparent border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:text-white"
-                placeholder="••••••••"
-                required
-              />
+        ) :apiStatus === "forbidden" ? (
+          /* CRASH SERVEUR (500) */
+          <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
+            <h1 className="text-8xl font-black text-slate-200 dark:text-slate-800 absolute -z-10">
+              403
+            </h1>
+            <div className="relative z-10 space-y-4">
+              <h2 className="text-2xl font-black text-red-500 uppercase tracking-widest">
+                Erreur
+              </h2>
+              <p className="text-slate-400 max-w-sm italic">
+                {error}
+              </p>
+              
             </div>
           </div>
+        ) : apiStatus === "offline" ? (
+          /* CRASH SERVEUR (500) */
+          <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
+            <h1 className="text-8xl font-black text-slate-200 dark:text-slate-800 absolute -z-10">
+              500
+            </h1>
+            <div className="relative z-10 space-y-4">
+              <h2 className="text-2xl font-black text-red-500 uppercase tracking-widest">
+                Erreur
+              </h2>
+              <p className="text-slate-400 max-w-sm italic">{error}</p>
+              <button
+                onClick={handleSubmit}
+                className="px-8 py-3 border-2 border-red-500 text-red-500 rounded-2xl font-black hover:bg-red-500 hover:text-white transition-all"
+              >
+                Relancer la requête
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="mb-10">
+              <div className="inline-flex items-center justify-center w-14 h-14 mb-6 text-white rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-200 dark:shadow-none">
+                <LogIn size={28} />
+              </div>
+              <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
+                Connexion Admin
+              </h1>
+              <p className="mt-2 text-slate-500 dark:text-slate-400">
+                Accédez à votre espace d'administration ElectroShop
+              </p>
+            </div>
 
-          <button
-            type="submit"
-            onClick={NavigateToDash}
-            className="w-full py-4 font-bold text-white transition-all bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none active:scale-95"
-          >
-            Se connecter
-          </button>
-        </form>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Adresse Email
+                </label>
+                <div className="relative">
+                  <Mail
+                    className="absolute left-3 top-3.5 text-slate-400"
+                    size={20}
+                  /> 
+                  <input
+                    type="email"
+                    name="email"
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-3 dark:bg-transparent border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:text-white"
+                    placeholder="admin@electroshop.com"
+                    required
+                  /> {
+                    apiStatus === "identifiants_invalides" ? <span className="text-red-500 italic">
+                      {
+                        error
+                      }
+                    </span> : ''
+                  }
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Mot de passe
+                </label>
+                <div className="relative">
+                  <Lock
+                    className="absolute left-3 top-3.5 text-slate-400"
+                    size={20}
+                  />
+                  <input
+                    type="password"
+                    name="password"
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-3 bg-transparent border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:text-white"
+                    placeholder="••••••••"
+                    required
+                  />
+                  {
+                    apiStatus === "identifiants_invalides" ? <span className="text-red-500 italic">
+                      {
+                        error
+                      }
+                    </span> : ''
+                  }
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                // onClick={NavigateToDash}
+                className="w-full py-4 font-bold text-white transition-all bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none active:scale-95"
+              >
+                Se connecter
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       <div className="relative hidden w-1/2 overflow-hidden md:flex bg-[#030712] items-center justify-center">
@@ -119,17 +232,17 @@ const LoginPage = () => {
           <div className="h-1 w-24 bg-blue-500 mx-auto mb-6 rounded-full shadow-[0_0_10px_#3b82f6]"></div>
           <p className="text-xl text-gray-400 font-light leading-relaxed max-w-md mx-auto">
             L'écosystème{" "}
-            <span className="text-blue-400 font-medium">Electroshop</span> pour la
-            gestion de votre inventaire d'articles technologiques.
+            <span className="text-blue-400 font-medium">Electroshop</span> pour
+            la gestion de votre inventaire d'articles technologiques.
           </p>
         </div>
-
 
         {/* Card 1 : MacBook */}
         <div className="absolute top-24 right-16 p-5 bg-black/40 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl animate-[float_6s_ease-in-out_infinite]">
           <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-3 border border-blue-500/30">
-            <span className="text-2xl"><Computer className="bg-blue-600" /></span>
-            
+            <span className="text-2xl">
+              <Computer className="bg-blue-600" />
+            </span>
           </div>
           <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">
             Performance
@@ -139,7 +252,9 @@ const LoginPage = () => {
         {/* Card 2 : iPhone - Flotte en bas à gauche */}
         <div className="absolute bottom-24 left-16 p-5 bg-black/40 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl animate-[float_8s_ease-in-out_infinite_1s]">
           <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-3 border border-purple-500/30">
-            <span className="text-2xl"><Phone className="bg-purpule-600" /></span>
+            <span className="text-2xl">
+              <Phone className="bg-purpule-600" />
+            </span>
           </div>
           <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-1">
             Mobilité

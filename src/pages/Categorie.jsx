@@ -1,38 +1,61 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SideBar from "./SideBar";
 import Header from "./header";
 import { Eye, Folder, Pencil, Trash2 } from "lucide-react";
+import { getCategories } from "../ApiSevice/api";
 
 const Categorie = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [error, setError] = useState(null);
 
-  const cats = [
+
+  const fetchCategories = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await getCategories();
+      setCategories(response.data.data);
+      setError('Error') ;
+    } catch (err) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }  
+
+  useEffect(() => {
+    fetchCategories();
+  } , []) ;
+
+  const cats = fetchCategories && categories /*[
     {
       id: 1,
-      nom: "Smartphones",
+      name: "Smartphones",
       description: "Téléphones intelligents et accessoires",
       prod_number: 43,
     },
     {
       id: 2,
-      nom: "Smartphones",
+      name: "Smartphones",
       description: "Téléphones intelligents et accessoires",
       prod_number: 0,
     },
     {
       id: 3,
-      nom: "Smartphones",
+      name: "Smartphones",
       description: "Téléphones intelligents et accessoires",
       prod_number: 43,
     },
     {
       id: 3,
-      nom: "Smartphones",
+      name: "Smartphones",
       description: "Téléphones intelligents et accessoires",
       prod_number: 43,
     },
-  ];
+  ]; */
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
@@ -69,9 +92,9 @@ const Categorie = () => {
           {cats.map((cat) => (
             <CategorieCard
               key={cat.id}
-              nom={cat.nom}
+              name={cat.name}
               description={cat.description}
-              prod_number={cat.prod_number}
+              prod_number={cat.product.length}
             />
           ))}
         </div>
@@ -80,7 +103,7 @@ const Categorie = () => {
   );
 };
 
-const CategorieCard = ({ nom, description, prod_number }) => {
+const CategorieCard = ({ name, description, prod_number }) => {
   return (
     <div className="max-w-sm p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm group">
       <div className="flex items-start justify-between mb-6">
@@ -109,7 +132,7 @@ const CategorieCard = ({ nom, description, prod_number }) => {
 
       <div className="space-y-1 mb-6">
         <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-          {nom}
+          {name}
         </h3>
         <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
           {description}

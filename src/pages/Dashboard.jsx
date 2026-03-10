@@ -31,6 +31,7 @@ import Header from "./header";
 import { useNavigate } from "react-router-dom";
 import { getDashboard } from "../ApiSevice/api";
 import TechSpinner from "./TechSpinner";
+import { tr } from "framer-motion/client";
 
 const Dashboard = () => {
   const [dashData, setDashData] = useState({});
@@ -44,26 +45,30 @@ const Dashboard = () => {
   const fetchDash = async () => {
     try {
       setIsLoading(true);
-      setError(null); // Réinitialise l'erreur à chaque tentative
+      setError(null);
 
-      // Axios lance une exception automatiquement pour 4xx ou 5xx
       const response = await getDashboard();
 
-      // Si on arrive ici, c'est un succès (2xx)
       setDashData(response.data);
       setApiStatus("success");
     } catch (err) {
-      // 1. Erreur réseau (Serveur éteint, CORS, etc.)
+      //Erreur réseau (Serveur éteint)
       if (!err.response) {
         setApiStatus("offline");
         setError("Le serveur ne répond pas. Vérifiez votre connexion.");
       }
-      // 2. Erreur Serveur (500, 404, etc.)
-      else if (err.response.status >= 500) {
+      //Erreur Serveur (500)
+      else if (err.response.status == 500) {
         setApiStatus("server_error");
         setError("Erreur interne du serveur.");
+      } else if (err.response.status == 401) {
+        setApiStatus("auth");
+        setError("Non authentifié");
+      } else if (err.response.status == 403) {
+        setApiStatus("forbidden");
+        setError("Accès Interdit");
       }
-      // 3. Autres erreurs (403, 401, etc.)
+      //Autres erreurs
       else {
         setApiStatus("other_error");
         setError(
@@ -79,7 +84,7 @@ const Dashboard = () => {
     fetchDash();
   }, []);
   // Simulation de données API
-  const salesData = dashData.commandes_mois ; /* [
+  const salesData = dashData.commandes_mois; /* [
     { name: "Jan", ventes: 42000 },
     { name: "Fev", ventes: 50000 },
     { name: "Mar", ventes: 45000 },
@@ -88,7 +93,7 @@ const Dashboard = () => {
     { name: "Juin", ventes: 68000 },
   ]; */
 
-  const products = dashData && dashData.top_products /*[
+  const products = dashData && dashData.top_products || [] /*[
     {
       id: 1,
       name: "IPhone 17 pro",
@@ -152,7 +157,7 @@ const Dashboard = () => {
             <TechSpinner />
           </div>
         ) : apiStatus === "offline" ? (
-          /* UI : SERVEUR ÉTEINT (ERR_CONNECTION_REFUSED) */
+          /* SERVEUR ÉTEINT (ERR_CONNECTION_REFUSED) */
           <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
             <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-[2rem] text-center">
               <div className="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -173,7 +178,7 @@ const Dashboard = () => {
             </div>
           </div>
         ) : apiStatus === "server_error" ? (
-          /* UI : CRASH SERVEUR (500) */
+          /* CRASH SERVEUR (500) */
           <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
             <h1 className="text-8xl font-black text-slate-200 dark:text-slate-800 absolute -z-10">
               500
@@ -182,15 +187,45 @@ const Dashboard = () => {
               <h2 className="text-2xl font-black text-red-500 uppercase tracking-widest">
                 Erreur
               </h2>
-              <p className="text-slate-400 max-w-sm italic">
-                {error}
-              </p>
+              <p className="text-slate-400 max-w-sm italic">{error}</p>
               <button
                 onClick={fetchDash}
                 className="px-8 py-3 border-2 border-red-500 text-red-500 rounded-2xl font-black hover:bg-red-500 hover:text-white transition-all"
               >
                 Relancer la requête
               </button>
+            </div>
+          </div>
+        ) : apiStatus === "auth" ? (
+          /* CRASH SERVEUR (500) */
+          <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
+            <h1 className="text-8xl font-black text-slate-200 dark:text-slate-800 absolute -z-10">
+              401
+            </h1>
+            <div className="relative z-10 space-y-4">
+              <h2 className="text-2xl font-black text-red-500 uppercase tracking-widest">
+                Erreur
+              </h2>
+              <p className="text-slate-400 max-w-sm italic">{error}</p>
+              <button
+                onClick={fetchDash}
+                className="px-8 py-3 border-2 border-red-500 text-red-500 rounded-2xl font-black hover:bg-red-500 hover:text-white transition-all"
+              >
+                Relancer la requête
+              </button>
+            </div>
+          </div>
+        ) : apiStatus === "forbidden" ? (
+          /* CRASH SERVEUR (500) */
+          <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
+            <h1 className="text-8xl font-black text-slate-200 dark:text-slate-800 absolute -z-10">
+              403
+            </h1>
+            <div className="relative z-10 space-y-4">
+              <h2 className="text-2xl font-black text-red-500 uppercase tracking-widest">
+                Erreur
+              </h2>
+              <p className="text-slate-400 max-w-sm italic">{error}</p>
             </div>
           </div>
         ) : (
@@ -349,15 +384,28 @@ const Dashboard = () => {
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {
                         // Je consomme facilement mon API ici
-                        products && products.map((product) => (
-                          product.sale_count >0 ? 
-                          <TableRow
-                            key={product.id}
-                            name={product.nom}
-                            sales={product.sale_count}
-                            revenue={product.sale_count*product.prix_unitaire+" F"} 
-                          /> : null
-                        ))
+                        products && products.length == 0 ? (
+                          <tr className="text-center">
+                            <td colSpan="6"
+                            className="px-6 py-12 text-center text-slate-500 italic dark:text-slate-400">
+                              Aucune information
+                            </td>
+                          </tr>
+                        ) : (
+                          products.map((product) =>
+                            product.sale_count > 0 ? (
+                              <TableRow
+                                key={product.id}
+                                name={product.nom}
+                                sales={product.sale_count}
+                                revenue={
+                                  product.sale_count * product.prix_unitaire +
+                                  " F"
+                                }
+                              />
+                            ) : null,
+                          )
+                        )
                       }
                     </tbody>
                   </table>
