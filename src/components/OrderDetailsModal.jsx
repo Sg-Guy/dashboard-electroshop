@@ -117,7 +117,7 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
                             </td>
                             <td className="px-6 py-4 text-center">
                               <span className="text-sm dark:text-slate-400">
-                                {product.prix_unitaire.toLocaleString()}
+                                {product.prix_promo ? product.prix_promo.toLocaleString() : product.prix_unitaire.toLocaleString()}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-center">
@@ -126,7 +126,7 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right dark:text-white text-sm">
-                              {(product.prix_unitaire * product.pivot.quantity).toLocaleString()} F
+                              {((product.prix_promo ? product.prix_promo : product.prix_unitaire) * product.pivot.quantity).toLocaleString()} F
                             </td>
                           </tr>
                         ))}

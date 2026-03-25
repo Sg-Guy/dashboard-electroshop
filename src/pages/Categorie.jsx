@@ -6,23 +6,42 @@ import { Eye, Folder, Pencil, Trash2 } from "lucide-react";
 import { getCategories } from "../ApiSevice/api";
 import url from "../utils/url";
 import { useNavigate } from "react-router-dom";
+import StateLayer from "../components/StateLayer";
+import BackGround from "../components/background";
+import { useTheme } from "../context/ThemeContext";
+import CategoryDetailModal from "../components/CategoryDetail";
+import { select } from "framer-motion/client";
 
 const Categorie = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState(null);
+  const [apiStatus, setApiStatus] = useState(""); 
+  const { isDarkMode } = useTheme();
+  //pour les details
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isDetailModalOpen, setDetailModalOpen] = useState(false);
 
 
+     //fonction pour ouvrir les details
+  const handleViewDetail = (category) => {
+    setSelectedCategory(category);
+    setDetailModalOpen(true);
+  };
+
+  //API
   const fetchCategories = async () => {
     setIsLoading(true);
     setError(null);
+    setApiStatus(""); 
     try {
       const response = await getCategories();
       setCategories(response.data.data);
-      setError('Error') ;
+      setApiStatus("success");
     } catch (err) {
       setError(err);
+      setApiStatus("error");
     } finally {
       setIsLoading(false);
     }
@@ -61,6 +80,8 @@ const Categorie = () => {
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+      <BackGround isDarkMode={isDarkMode} />
+
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div
@@ -74,7 +95,7 @@ const Categorie = () => {
       </AnimatePresence>
 
       <div
-        className={`fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 transition-transform duration-300 ease-in-out`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 transition-transform duration-300 ease-in-out bg-white dark:bg-slate-900`}
       >
         <SideBar
           activePage="categories"
@@ -82,14 +103,20 @@ const Categorie = () => {
         />
       </div>
 
-      <main className="flex-1 lg:ml-64 w-full overflow-x-hidden">
+      <main className="z-10 flex-1 lg:ml-64 w-full overflow-x-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
+        <div className="p-3 lg:p-4">
+          <StateLayer
+            isLoading={isLoading}
+            apiStatus={apiStatus}
+            onRetry={() => {}}
+          >
+                    
         <div className=" lg:px-8 py-3">
           <p className="dark:text-white text-3xl font-bold">Catégories</p>
           <p className="text-slate-500">Gestion des catégories</p>
         </div>
-
         <div className=" lg:px-8 py-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 ">
           {cats.map((cat) => (
             <CategorieCard
@@ -97,19 +124,26 @@ const Categorie = () => {
               name={cat.name}
               description={cat.description}
               prod_number={cat.product.length}
+              nav={() => handleViewDetail(cat)}
             />
           ))}
         </div>
+          </StateLayer>
+        </div>
+
+          <CategoryDetailModal
+          
+            isOpen={isDetailModalOpen}
+            onClose={() => setDetailModalOpen(false)}
+            category={selectedCategory}
+          />
       </main>
     </div>
   );
 };
 
-const CategorieCard = ({ name, description, prod_number }) => {
-   const navigation = useNavigate();
-  const NavigateToDetails = (prod)=>{
-    navigation(`${url}/categories/details`)
-  }
+const CategorieCard = ({ name, description, prod_number , nav }) => {
+  
   return (
     <div className="max-w-sm p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm group">
       <div className="flex items-start justify-between mb-6">
@@ -118,7 +152,7 @@ const CategorieCard = ({ name, description, prod_number }) => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button onClick={NavigateToDetails} className="cursor-pointer p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+          <button onClick={()=>nav()} className="cursor-pointer p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
             <Eye size={18} />
           </button>
           <button className="cursor-pointer p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">

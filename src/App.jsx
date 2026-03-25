@@ -7,7 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import ProductPage from "./pages/Products";
 import Categorie from "./pages/Categorie";
-import CategoryDetail from "./pages/CategoryDetail";
+//import CategoryDetail from "./pages/CategoryDetail";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import url from "./utils/url";
 import ProductDetail from "./pages/ProductDetail";
@@ -32,10 +32,10 @@ function App() {
           />
           <Route path={`${url}/products`} element={<ProductPage />} />
           <Route path={`${url}/categories`} element={<Categorie />} />
-          <Route
+          {/* <Route
             path={`${url}/categories/details/:category}`}
             element={<CategoryDetail />}
-          />
+          /> */}
           <Route path={`${url}/product/:id`} element={<ProductDetail />} />
           <Route path={`${url}/orders`} element={<OrdersPage />} />
           <Route path={`${url}/orders/:id`} element={<OrderDetail />} />

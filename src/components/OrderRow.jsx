@@ -57,7 +57,7 @@ const OrderRow = ({ order, onStatusChange, nav }) => {
       <td className="px-6 py-4">
         <div className="flex justify-center">
           <ActionButton
-            click={() => nav(order.reference)}
+            click={() => nav()}
             icon={<Eye size={18} />}
             color="text-blue-500"
             hover="hover:bg-blue-50 dark:hover:bg-blue-900/30"
