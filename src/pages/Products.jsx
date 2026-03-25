@@ -2,14 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Eye, Pencil, Trash2, Plus, Search, Wifi } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
-import SideBar from "./SideBar";
-import Header from "./header";
-import ProductModal from "./ProductModal";
+import SideBar from "../components/SideBar";
+import Header from "../components/header";
+import ProductModal from "../components/ProductModal";
 import EditProductModal from "./EditProduct";
 import { Navigate, replace, useNavigate } from "react-router-dom";
-import { getCategories, getProducts } from "../ApiSevice/api";
-import TechSpinner from "./TechSpinner";
+import { deleteProduct, getCategories, getProducts } from "../ApiSevice/api";
 import url from "../utils/url";
+import StateLayer from "../components/StateLayer";
+import BackGround from "../components/background";
+import ActionButton from "../components/ActionButton";
 
 const ProductPage = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -30,6 +32,7 @@ const ProductPage = () => {
     setEditModalOpen(true);
   };
 
+ 
   const navigation = useNavigate();
   const NavigateToDetail = (id) => {
     navigation(`${url}/product/${id}`);
@@ -54,20 +57,14 @@ const ProductPage = () => {
     } catch (err) {
       if (!err.response) {
         setApiStatus("offline");
-        setError("Le serveur ne répond pas. Vérifiez votre connexion.");
+        setError("Le serveur est injoignable. Vérifiez votre connexion.");
       } else if (err.response.status === 500) {
         setApiStatus("server_error");
-        setError("Erreur interne du serveur.");
-      } else if (err.response.status === 401) {
-        setApiStatus("auth");
-        setError("Non authentifié");
-      } else if (err.response.status === 403) {
-        setApiStatus("forbidden");
-        setError("Accès Interdit");
+        setError("Le serveur a rencontré un problème technique.");
       } else {
         setApiStatus("other_error");
         setError(
-          `Erreur ${err.response.status}: ${err.response.data?.message || "Une erreur est survenue"}`,
+          err.response.data?.message || "Impossible de charger les données.",
         );
       }
     } finally {
@@ -108,13 +105,7 @@ const ProductPage = () => {
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
-      <div
-        className="absolute inset-0 z-0 opacity-30 dark:opacity-10 pointer-events-none"
-        style={{
-          backgroundImage: `linear-gradient(${isDarkMode ? "#334155" : "#e5e7eb"} 1px, transparent 1px), linear-gradient(90deg, ${isDarkMode ? "#334155" : "#e5e7eb"} 1px, transparent 1px)`,
-          backgroundSize: "40px 40px",
-        }}
-      ></div>
+      <BackGround isDarkMode={isDarkMode} />
 
       <AnimatePresence>
         {isSidebarOpen && (
@@ -129,7 +120,9 @@ const ProductPage = () => {
       </AnimatePresence>
 
       <div
-        className={`fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 transition-transform duration-300 ease-in-out`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0 transition-transform duration-300 ease-in-out bg-white dark:bg-slate-900`}
       >
         <SideBar
           activePage="products"
@@ -140,42 +133,16 @@ const ProductPage = () => {
       <main className="z-10 flex-1 lg:ml-64 w-full overflow-x-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
-        {isLoading ? (
-          <div className="flex h-[60vh] items-center justify-center">
-            <TechSpinner />
-          </div>
-        ) : ["offline", "server_error", "auth", "forbidden"].includes(
-            apiStatus,
-          ) ? (
-          <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
-            <h1 className="text-8xl font-black text-slate-200 dark:text-slate-800 absolute -z-10 uppercase">
-              {apiStatus === "offline"
-                ? <Wifi size={100} />
-                : apiStatus === "server_error"
-                  ? "500"
-                  : apiStatus === "auth"
-                    ? "401"
-                    : "403"}
-            </h1>
-            <div className="relative z-10 space-y-4">
-              <h2 className="text-2xl font-black text-red-500 uppercase tracking-widest">
-                Erreur
-              </h2>
-              <p className="text-slate-500 dark:text-slate-400 max-w-sm italic">
-                {error}
-              </p>
-              {apiStatus !== "forbidden" && (
-                <button
-                onClick={NavigateToLogin}
-                className="px-8 py-3 bg-blue-600/20 text-white rounded-2xl font-black hover:scale-105 transition-all"
-                >
-                  S'authentifier
-                </button>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div>
+          <div className="p-4 lg:p-8">
+
+        <StateLayer 
+            isLoading={isLoading} 
+            apiStatus={apiStatus} 
+            error={error} 
+            onRetry={fetchProducts}
+          >
+              
+<div>
             <div className="px-4 lg:px-8 py-3">
               <p className="dark:text-white text-3xl font-bold">Produits</p>
               <p className="text-slate-500">Gérez les produits efficacement.</p>
@@ -259,13 +226,23 @@ const ProductPage = () => {
               product={selectedProduct}
             />
           </div>
-        )}
+          </StateLayer>
+          </div>
+        
       </main>
     </div>
   );
 };
 
-const TableRow = ({ product, onEdit, nav }) => {
+const TableRow = ({ product, onEdit, nav  , onDelete}) => {
+   const handleDeleteClick = async (id)  => {
+    try {
+      const response = await deleteProduct(product.id) ;
+      alert(`${response.data.message}`) ;
+    } catch (err) {
+      alert (err.response.data?.message) ;
+    } 
+  }
   const isLowStock = product.stock < 15;
   return (
     <motion.tr
@@ -296,7 +273,7 @@ const TableRow = ({ product, onEdit, nav }) => {
         {product.category_name}
       </td>
       <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">
-        {product.prix_unitaire} €
+        {product.prix_unitaire} F
       </td>
       <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-sm">
         {product.stock} unités
@@ -323,7 +300,7 @@ const TableRow = ({ product, onEdit, nav }) => {
             hover="hover:bg-slate-100 dark:hover:bg-slate-800"
           />
           <ActionButton
-            click={() => {}}
+            click={() => handleDeleteClick(product.id)}
             icon={<Trash2 size={18} />}
             color="text-red-500"
             hover="hover:bg-red-50 dark:hover:bg-red-900/30"
@@ -334,14 +311,6 @@ const TableRow = ({ product, onEdit, nav }) => {
   );
 };
 
-const ActionButton = ({ icon, color, hover, title, click }) => (
-  <button
-    onClick={click}
-    className={`p-2 rounded-lg transition-all ${color} ${hover}`}
-    title={title}
-  >
-    {icon}
-  </button>
-);
+
 
 export default ProductPage;

@@ -70,7 +70,7 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="lg:ml-64 fixed inset-0 z-[100] flex items-center justify-center p-4">
         {/* Overlay sombre */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -85,7 +85,7 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+          className="lg:ml-10 relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
         >
           {/* Header */}
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">

@@ -4,6 +4,7 @@ import { useTheme } from "../context/ThemeContext";
 
 const Header = ({ onMenuClick }) => {
   const { isDarkMode, toggleTheme } = useTheme();
+  const user = localStorage.getItem("user");
   return (
     <header className="">
       <div className="sticky top-0 z-30 flex items-center justify-between p-4 dark:bg-slate-900/20 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 lg:px-8 lg:py-6 lg:bg-transparent lg:border-1">
@@ -32,8 +33,8 @@ const Header = ({ onMenuClick }) => {
            </span>
         </div>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 font-bold">
-            AD
+          <div title="SuperAdmin" className=" w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 font-bold">
+            {user ? user.charAt(0).toUpperCase() + user.charAt(5).toUpperCase() : "U"}
           </div>
         </div>
         <div className="w-10 h-10 rounded-full bg-slate-100  flex items-center justify-center  font-bold">

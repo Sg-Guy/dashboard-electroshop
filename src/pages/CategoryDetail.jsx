@@ -9,18 +9,17 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import SideBar from "./SideBar";
+import SideBar from "../components/SideBar";
 import { AnimatePresence , motion } from "framer-motion";
 import { useState } from "react";
-import Header from "./header";
-import { tr } from "framer-motion/client";
-import ordinateur from "../assets/ordinateur.jpg" ;
+import Header from "../components/header";
+import StateLayer from "../components/StateLayer";
 
-const CategoryDetail = () => {
+const CategoryDetail = ({prod}) => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const cats = {
+  /*const category = {
     id: 1,
     nom: "Smartphones",
     description: "Téléphones intelligents et accessoires",
@@ -48,9 +47,9 @@ const CategoryDetail = () => {
         stock: 45,
       },
     ],
-  };
+  };*/
 
-  const filteredCat = cats.produits.filter((p) =>
+  const filteredCat = category.product.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase()),
   );
 
@@ -69,7 +68,9 @@ const CategoryDetail = () => {
       </AnimatePresence>
 
       <div
-        className={`fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 transition-transform duration-300 ease-in-out`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0 transition-transform duration-300 ease-in-out bg-white dark:bg-slate-900`}
       >
         <SideBar
           activePage="categories"
@@ -79,6 +80,8 @@ const CategoryDetail = () => {
 
       <main className="flex-1 lg:ml-64 w-full overflow-x-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
+<StateLayer>
+
 
         <div className="lg:px-8 py-3">
           {/* HEADER : Titre & Actions Principales */}
@@ -143,7 +146,7 @@ const CategoryDetail = () => {
             <div className="p-6 space-y-6">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                  Produits de la catégorie ({cats.produits.length})
+                  Produits de la catégorie ({category.produits.length})
                 </h2>
                 <button className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-all">
                   <Plus size={20} /> Ajouter un produit
@@ -206,6 +209,8 @@ const CategoryDetail = () => {
             </div>
           </div>
         </div>
+</StateLayer>
+          
       </main>
     </div>
   );

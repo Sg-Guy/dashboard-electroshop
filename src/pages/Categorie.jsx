@@ -1,9 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import SideBar from "./SideBar";
-import Header from "./header";
+import SideBar from "../components/SideBar";
+import Header from "../components/header";
 import { Eye, Folder, Pencil, Trash2 } from "lucide-react";
 import { getCategories } from "../ApiSevice/api";
+import url from "../utils/url";
+import { useNavigate } from "react-router-dom";
 
 const Categorie = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -104,6 +106,10 @@ const Categorie = () => {
 };
 
 const CategorieCard = ({ name, description, prod_number }) => {
+   const navigation = useNavigate();
+  const NavigateToDetails = (prod)=>{
+    navigation(`${url}/categories/details`)
+  }
   return (
     <div className="max-w-sm p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm group">
       <div className="flex items-start justify-between mb-6">
@@ -112,7 +118,7 @@ const CategorieCard = ({ name, description, prod_number }) => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="cursor-pointer p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+          <button onClick={NavigateToDetails} className="cursor-pointer p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
             <Eye size={18} />
           </button>
           <button className="cursor-pointer p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">

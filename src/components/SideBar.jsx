@@ -6,30 +6,25 @@ import {
   LogOut,
   Database,
 } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
-import { replace, useNavigate } from "react-router-dom";
-import url from "../utils/url" ;
+import { useNavigate } from "react-router-dom";
+import url from "../utils/url";
 
-const SideBar = ({ activePage }) => {
-  //Nvigation
+const SideBar = ({ activePage, closeMobile }) => {
+  const navigate = useNavigate();
 
-  const navigation = useNavigate();
-  const NavigateToDash = () => {
-    navigation(`${url}`);
+  // Fonction utilitaire pour naviguer et fermer le menu mobile
+  const handleNavigation = (path) => {
+    navigate(path);
+    if (closeMobile) closeMobile();
   };
-  const NavigateToProduct = () => {
-    navigation(`${url}/products`);
-  };
-  const NavigateToCategory = () => {
-    navigation(`${url}/categories`);
-  };
+
   const NavigateToLogin = () => {
-    navigation('/login' , {replace: true});
+    localStorage.removeItem("token");
+    navigate("/login", { replace: true });
   };
-  //Fin Navigations
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col hidden lg:flex">
-      <div className="p-6">
+<aside className="h-full w-full flex flex-col border-r border-slate-200 dark:border-slate-800">      <div className="p-6">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
           ElectroShop
         </h2>
@@ -37,35 +32,37 @@ const SideBar = ({ activePage }) => {
           Admin Dashboard
         </p>
       </div>
-
       <nav className="flex-1 px-4 space-y-2 mt-4">
         <SidebarItem
           icon={<LayoutDashboard size={20} />}
           label="Tableau de bord"
           active={activePage === "dashboard"}
-          click={NavigateToDash}
+          click={() => handleNavigation(`${url}`)}
         />
         <SidebarItem
           icon={<Package size={20} />}
           label="Produits"
           active={activePage === "products"}
-          click={NavigateToProduct}
+          click={() => handleNavigation(`${url}/products`)}
         />
         <SidebarItem
           icon={<Layers size={20} />}
           label="Catégories"
           active={activePage === "categories"}
-          click={NavigateToCategory}
+          click={() => handleNavigation(`${url}/categories`)}
         />
         <SidebarItem
           icon={<Database size={20} />}
-          label="Gestion du Stock"
-          active={activePage === "stock"}
+          label="Commandes"
+          active={activePage === "orders"}
+          click={() => handleNavigation(`${url}/orders`)}
         />
       </nav>
-
       <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-        <button onClick={NavigateToLogin} className="flex items-center gap-3 text-red-500 font-medium p-3 w-full hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-all">
+        <button
+          onClick={NavigateToLogin}
+          className="flex items-center gap-3 text-red-500 font-medium p-3 w-full hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-all"
+        >
           <LogOut size={20} /> Déconnexion
         </button>
       </div>

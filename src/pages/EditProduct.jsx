@@ -10,20 +10,21 @@ import {
   Plus,
   Pencil,
 } from "lucide-react";
+import { putProduct } from "../ApiSevice/api";
 
 const EditProductModal = ({ isOpen, onClose, categories, product }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    nom: "",
-    category_id: "",
-    description: "",
-    stock: 0,
-    prix_unitaire: "",
-    prix_promo: "",
-    vedette: 0,
-    image: null,
+    nom :product && isOpen && product.nom , // attention : vérifie si c'est .nom ou .nom dans ton objet
+    category_id :  product && product.category_id ,
+    description  :  product && product.description,
+    prix_unitaire :  product && product.prix_unitaire ,
+    prix_promo :  product && product.prix_promo ,
+    stock  :  product && product.stock,
+    vedette :  product && product.vedette,
+    image :  product && product.image || null
   });
 
-  // CRUCIAL : Met à jour le formulaire quand le produit change
   useEffect(() => {
     if (product && isOpen) {
       setFormData({
@@ -38,41 +39,61 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
       });
     }
   }, [product, isOpen]);
-  // Fonction pour gérer les changements de saisie
-  const [errors, setErrors] = useState({});
 
-  // Correction du handleChange pour supporter les fichiers et les nombres
   const handleChange = (e) => {
-    const { nom, value, type, checked, files } = e.target;
-
-    let finalValue = value;
-    if (type === "checkbox") finalValue = checked ? 1 : 0;
-    if (type === "file") finalValue = files[0]; // Stocke l'objet File
-    if (type === "number") finalValue = value === "" ? "" : Number(value);
-
-    setFormData((prev) => ({ ...prev, [nom]: finalValue }));
-    // Nettoyer l'erreur quand l'utilisateur tape
-    if (errors[nom]) setErrors((prev) => ({ ...prev, [nom]: null }));
+    const { name, value, type, checked } = e.target;
+    if (name === "image") {
+      setFormData({
+        ...formData,
+        image: e.target.files[0],
+      });
+      return;
+    }
+    setFormData({
+      ...formData,
+      [name]:
+        type === "checkbox"
+          ? checked
+            ? 1
+            : 0
+          : type === "number"
+            ? Number(value)
+            : value,
+    });
   };
+  // Au clic du bouton submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  // Fonction de validation
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.nom) newErrors.nom = "Le nom est obligatoire";
-    if (!formData.category_id)
-      newErrors.category_id = "Choisissez une catégorie";
-    if (formData.prix_unitaire <= 0) newErrors.prix_unitaire = "Prix invalide";
-    if (formData.stock < 0) newErrors.stock = "Le stock ne peut être négatif";
+    // Utilisation de FormData pour supporter l'envoi d'image
+    const data = new FormData();
+    data.append("category_id", formData.category_id);
+    data.append("nom", formData.nom);
+    data.append("description", formData.description);
+    data.append("stock", formData.stock);
+    data.append("prix_unitaire", formData.prix_unitaire);
+    data.append("prix_promo", formData.prix_promo);
+    data.append("vedette", formData.vedette);
+    if (formData.image) {
+      data.append("image", formData.image); // Ajoute le fichier
+    }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    try {
+      const response = await putProduct(product && isOpen && product.id, data);
+      alert(`${response.data.message}`);
+      console.log(response.data);
+    } catch (error) {
+      //console.error("Erreur lors de l'envoi", error.response?.data || error);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  if (!isOpen || !product) return null;
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="lg:ml-64 fixed inset-0 z-[100] flex items-center justify-center p-4">
         {/* Overlay sombre */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -87,7 +108,7 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+          className="lg:ml-10 relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
         >
           {/* Header */}
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
@@ -102,7 +123,10 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
             </button>
           </div>
 
-          <form className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          <form
+            onSubmit={handleSubmit}
+            className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar"
+          >
             {/* Nom & Catégorie */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -110,28 +134,25 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
                   Nom du produit
                 </label>
                 <input
-                  name="nom"
                   type="text"
-                  className={`form-input-tech ${errors.nom ? "border-red-500 ring-1 ring-red-500/20" : ""}`}
+                  name="nom"
                   value={formData.nom}
                   onChange={handleChange}
+                  placeholder="ex: iPhone 15 Pro"
+                  className="form-input-tech"
+                  required
                 />
-                {errors.nom && (
-                  <p className="text-[10px] text-red-500 font-bold italic">
-                    {errors.nom}
-                  </p>
-                )}
               </div>
-
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
                   Catégorie
                 </label>
                 <select
                   name="category_id"
-                  className={`form-input-tech ${errors.category_id ? "border-red-500" : ""}`}
                   value={formData.category_id}
                   onChange={handleChange}
+                  className="form-input-tech"
+                  required
                 >
                   <option value="">Sélectionner...</option>
                   {categories?.map((c) => (
@@ -140,15 +161,10 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
                     </option>
                   ))}
                 </select>
-                {errors.category_id && (
-                  <p className="text-[10px] text-red-500 font-bold italic">
-                    {errors.category_id}
-                  </p>
-                )}
               </div>
             </div>
 
-            {/* Description - CORRECTION : Utiliser value et non children */}
+            {/* Description */}
             <div className="space-y-2">
               <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
                 Description
@@ -156,11 +172,11 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
               <textarea
                 rows="3"
                 name="description"
-                className="form-input-tech"
-                placeholder="Détails techniques..."
                 value={formData.description}
                 onChange={handleChange}
-              />
+                className="form-input-tech"
+                placeholder="Détails techniques..."
+              ></textarea>
             </div>
 
             {/* Prix & Promo */}
@@ -172,47 +188,43 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
                 <input
                   type="number"
                   name="prix_unitaire"
-                  className={`form-input-tech ${errors.prix_unitaire ? "border-red-500" : ""}`}
                   value={formData.prix_unitaire}
                   onChange={handleChange}
+                  className="form-input-tech"
+                  placeholder="0.00"
+                  required
                 />
-                {errors.prix_unitaire && (
-                  <p className="text-[10px] text-red-500 font-bold italic">
-                    {errors.prix_unitaire}
-                  </p>
-                )}
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  Prix Promo
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  Prix Promo (Optionnel)
                 </label>
                 <input
                   type="number"
                   name="prix_promo"
-                  className="form-input-tech"
                   value={formData.prix_promo}
                   onChange={handleChange}
+                  className="form-input-tech"
+                  placeholder="0.00"
                 />
               </div>
             </div>
 
-            {/* Stock */}
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                <Layers size={12} /> Quantité en stock
-              </label>
-              <input
-                type="number"
-                name="stock"
-                className={`form-input-tech ${errors.stock ? "border-red-500" : ""}`}
-                value={formData.stock}
-                onChange={handleChange}
-              />
-              {errors.stock && (
-                <p className="text-[10px] text-red-500 font-bold italic">
-                  {errors.stock}
-                </p>
-              )}
+            {/* Quantité & Stock */}
+            <div className="">
+              <div className="space-y-1">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  <Layers size={12} /> Quantité
+                </label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  className="form-input-tech"
+                  required
+                />
+              </div>
             </div>
 
             {/* Vedette & Image */}
@@ -222,14 +234,14 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
                   <input
                     type="checkbox"
                     name="vedette"
-                    className="sr-only peer"
-                    checked={formData.vedette === 1}
+                    checked={formData.vedette}
                     onChange={handleChange}
+                    className="sr-only peer"
                   />
                   <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5"></div>
                 </div>
                 <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                  Vedette
+                  Mettre en vedette
                 </span>
               </label>
 
@@ -267,19 +279,22 @@ const EditProductModal = ({ isOpen, onClose, categories, product }) => {
               </div>
             </div>
             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex gap-4">
-            <button
-              onClick={onClose}
-              className="flex-1 py-3 px-6 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
-            >
-              Annuler
-            </button>
-            <button className="flex-2 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-200 dark:shadow-none">
-              <Save size={20} /> Enregistrer le produit
-            </button>
-          </div>
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 px-6 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="flex-2 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-200 dark:shadow-none"
+              >
+                {isLoading ? "En Cours" : <Save size={20} />}
+              </button>
+            </div>
           </form>
-
-          
         </motion.div>
       </div>
     </AnimatePresence>
