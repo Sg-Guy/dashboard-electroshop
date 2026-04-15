@@ -1,6 +1,6 @@
 import { Bell, Menu, Moon, Sun } from "lucide-react";
 import { useState } from "react";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/themeContext";
 
 const Header = ({ onMenuClick }) => {
   const { isDarkMode, toggleTheme } = useTheme();
