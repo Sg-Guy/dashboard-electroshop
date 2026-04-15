@@ -4,7 +4,7 @@ import {
   Package, ShoppingCart, BarChart3, 
   Layers, Settings, ArrowRight, Bell, Sun, Moon 
 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../context/themeContext';
 import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {

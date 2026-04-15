@@ -8,7 +8,7 @@ import url from "../utils/url";
 import { useNavigate } from "react-router-dom";
 import StateLayer from "../components/StateLayer";
 import BackGround from "../components/background";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/themeContext";
 import CategoryDetailModal from "../components/CategoryDetail";
 import { select } from "framer-motion/client";
 

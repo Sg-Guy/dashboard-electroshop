@@ -12,7 +12,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/themeContext";
 import SideBar from "../components/SideBar";
 import Header from "../components/header";
 import { getDashboard } from "../ApiSevice/api";

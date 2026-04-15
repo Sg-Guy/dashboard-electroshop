@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LogIn, Mail, Lock, Sun, Moon, Computer, Phone } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/themeContext";
 import { useNavigate } from "react-router-dom";
 import url from "../utils/url";
 import api, { login } from "../ApiSevice/api";

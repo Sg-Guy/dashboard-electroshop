@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Eye, ShoppingBag, Filter } from "lucide-react";
 import BackGround from "../components/background";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/themeContext";
 import SideBar from "../components/SideBar";
 import Header from "../components/header";
 import StateLayer from "../components/StateLayer";

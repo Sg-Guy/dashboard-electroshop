@@ -17,7 +17,7 @@ import url from "../utils/url";
 import { getProductDetails } from "../ApiSevice/api";
 import StateLayer from "../components/StateLayer";
 import BackGround from "../components/background";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/themeContext";
 
 const ProductDetail = () => {
   // Navigation

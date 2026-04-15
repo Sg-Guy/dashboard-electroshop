@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Eye, Pencil, Trash2, Plus, Search, Wifi } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/themeContext";
 import SideBar from "../components/SideBar";
 import Header from "../components/header";
 import ProductModal from "../components/ProductModal";
