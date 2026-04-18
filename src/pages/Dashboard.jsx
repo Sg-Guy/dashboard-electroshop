@@ -98,7 +98,7 @@ const Dashboard = () => {
 
 
         {
-          products.length == 0 ? <div>
+          products.length == 0 ? <div className="p-4 lg:p-8 flex-1 justify-content-center align-items-center dark:text-white text-3xl italic font-bold">
             Aucun produit enrégistré
           </div> : <div className="p-4 lg:p-8">
           {/* ON UTILISE LE COMPOSANT ICI */}
