@@ -2,15 +2,17 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Upload, Save, DollarSign, Layers, Plus } from "lucide-react";
 import { postProduct } from "../ApiSevice/api";
+import successDiv from "./succesDiv";
 
 const ProductModal = ({ isOpen, onClose, categories }) => {
+  const [validationErrors , setValidationErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     nom: "",
     category_id: "",
     description: "",
-    quantite: 0,
-    stock: 0,
+    quantite: "",
+    stock: "",
     prix_unitaire: "",
     prix_promo: "",
     vedette: 0,
@@ -58,10 +60,22 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
 
     try {
       const response = await postProduct(data);
-      alert(`${response.data.message}`);
-      console.log(response.data);
+
+      alert ("Le produit a bien été enregistré");
+      
+      formData.clear ;
     } catch (error) {
-      console.error("Erreur lors de l'envoi", error.response?.data || error);
+      if (error.response && error.response.status === 422) {
+        // erroreurs de validation Laravel
+        const apiErrors = error.response.data.errors;
+        const formattedErrors = {};
+        Object.keys(apiErrors).forEach(key => {
+          formattedErrors[key] = apiErrors[key][0];
+        });
+
+        //console.log (formattedErrors) ;
+        setValidationErrors(formattedErrors);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +130,10 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
                   className="form-input-tech"
                   required
                 />
+                {validationErrors.nom && <span className="text-[10px] font-bold text-red-500 ml-2 italic tracking-tighter">{validationErrors.nom}</span>}
+
               </div>
+                
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
                   Catégorie
@@ -135,7 +152,10 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
                     </option>
                   ))}
                 </select>
+                {validationErrors.category_id && <span className="text-[10px] font-bold text-red-500 ml-2 italic tracking-tighter">{validationErrors.category_id}</span>}
+
               </div>
+                
             </div>
 
             {/* Description */}
@@ -151,7 +171,10 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
                 className="form-input-tech"
                 placeholder="Détails techniques..."
               ></textarea>
+                {validationErrors.description && <span className="text-[10px] font-bold text-red-500 ml-2 italic tracking-tighter">{validationErrors.description}</span>}
+
             </div>
+              
 
             {/* Prix & Promo */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -168,7 +191,10 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
                   placeholder="0.00"
                   required
                 />
+                {validationErrors.prix_unitaire && <span className="text-[10px] font-bold text-red-500 ml-2 italic tracking-tighter">{validationErrors.prix_unitaire}</span>}
+
               </div>
+                
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                   Prix Promo (Optionnel)
@@ -181,7 +207,10 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
                   className="form-input-tech"
                   placeholder="0.00"
                 />
+                {validationErrors.prix_promo && <span className="text-[10px] font-bold text-red-500 ml-2 italic tracking-tighter">{validationErrors.prix_promo}</span>}
+
               </div>
+                
             </div>
 
             {/* Quantité & Stock */}
@@ -198,7 +227,10 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
                   className="form-input-tech"
                   required
                 />
+                {validationErrors.stock && <span className="text-[10px] font-bold text-red-500 ml-2 italic tracking-tighter">{validationErrors.stock}</span>}
+
               </div>
+                
             </div>
 
             {/* Vedette & Image */}
@@ -249,13 +281,16 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
                     onChange={handleChange}
                     accept="image/*"
                   />
+                {validationErrors.image && <span className="text-[10px] font-bold text-red-500 ml-2 italic tracking-tighter">{validationErrors.image}</span>}
+
                 </label>
+                  
               </div>
             </div>
-            <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex gap-4">
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex gap-4">
               <button
                 onClick={onClose}
-                className="flex-1 py-3 px-6 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                className="flex-1 py-3 px-6 cursor-pointer rounded-2xl font-bold text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
               >
                 Annuler
               </button>
@@ -263,11 +298,11 @@ const ProductModal = ({ isOpen, onClose, categories }) => {
                 type="submit"
                 onClick={handleSubmit}
                 disabled = {isLoading}
-                className="flex-2 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-200 dark:shadow-none"
+                className={`flex-2  flex items-center ${isLoading ? '' : "cursor-pointer"}  justify-center gap-2 ${isLoading ? "bg-slate-600 hover:bg-slate-700": "bg-blue-600 hover:bg-blue-700"} text-white px-10 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-200 dark:shadow-none `}
               >
                 {
-                  isLoading ? "En Cours" : 
-<Save size={20} /> 
+                  isLoading ? "En Cours..." : "Enregistrer"
+ 
                 }
               </button>
             </div>
