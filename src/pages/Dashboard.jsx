@@ -60,7 +60,7 @@ const Dashboard = () => {
     fetchDash();
   }, []);
 
-  // On garde votre logique de données pour Recharts comme demandé
+  // On garde la logique de données pour Recharts comme demandé
   const salesData = dashData?.commandes_mois || [];
   const products = dashData?.top_products || [];
 
@@ -97,7 +97,10 @@ const Dashboard = () => {
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
 
-        <div className="p-4 lg:p-8">
+        {
+          products.length == 0 ? <div>
+            Aucun produit enrégistré
+          </div> : <div className="p-4 lg:p-8">
           {/* ON UTILISE LE COMPOSANT ICI */}
           <StateLayer 
             isLoading={isLoading} 
@@ -233,6 +236,7 @@ const Dashboard = () => {
           </div>
           </StateLayer>
         </div>
+        }
 
        
       </main>
